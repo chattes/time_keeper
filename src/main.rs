@@ -1,9 +1,25 @@
 extern crate clap;
 use clap::{App, Arg, ArgMatches, SubCommand};
 
+#[derive(Debug)]
+struct TimeKeeper {
+    project_name: String,
+    task_name: String,
+    uuid: i32,
+}
+#[derive(Debug)]
+struct CreateTask {
+    project_name: String,
+    task_name: String,
+}
 fn main() {
     let arguments = set_up_cli();
-    parse_input(&arguments);
+    let (action, value) = parse_input(&arguments);
+
+    match action.as_str() {
+        "show" => println!("Show all Projects"),
+        _ => println!("Unknown command...Sorry"),
+    }
 }
 
 fn set_up_cli<'a>() -> ArgMatches<'a> {
@@ -39,11 +55,30 @@ fn set_up_cli<'a>() -> ArgMatches<'a> {
         .get_matches()
 }
 
-fn parse_input<'a>(arg: &ArgMatches<'a>) {
-    match arg.subcommand_name() {
-        Some("show") => println!("Show all Projects"),
-        Some("create") => println!("Create a New Project"),
-        Some("delete") => println!("Delete Selected Project"),
+fn parse_input<'a>(arg: &ArgMatches<'a>) -> (String, Option<CreateTask>) {
+    match arg.subcommand() {
+        ("show", Some(show_matches)) => (String::from("show"), None),
+        ("create", Some(create_matches)) => {
+            ((
+                String::from("create"),
+                Some(CreateTask {
+                    project_name: create_matches.value_of("name").unwrap().to_string(),
+                    task_name: String::from("default1"),
+                }),
+            ))
+        }
+
+        ("delete", Some(delete_matches)) => (
+            String::from("delete"),
+            Some(CreateTask {
+                project_name: delete_matches.value_of("name").unwrap().to_string(),
+                task_name: String::from("default1"),
+            }),
+        ),
         _ => panic!("No Command provided"),
     }
 }
+
+// fn create_project(name: &String, task: &String) -> TimeKeeper  {
+//
+// }
